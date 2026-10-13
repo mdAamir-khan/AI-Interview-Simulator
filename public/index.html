@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Interview Simulator</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <!-- Proctoring System: face-api.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+  <style>
+    /* ================================================================
+       MODERN DARK-THEME AI INTERVIEW SIMULATOR
+       ================================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-secondary: #12122a;
+      --bg-card: #1a1a3e;
+      --bg-card-hover: #22224a;
+      --bg-input: #0e0e24;
+      --text-primary: #f0f0ff;
+      --text-secondary: #b0b0d0;
+      --text-muted: #7070a0;
+      --accent-1: #6c5ce7;
+      --accent-2: #00d4aa;
+      --accent-3: #ff6b9d;
+      --accent-4: #ffd700;
+      --accent-5: #ff8c42;
+      --accent-gradient: linear-gradient(135deg, #6c5ce7, #00d4aa);
+      --accent-gradient-2: linear-gradient(135deg, #ff6b9d, #ffd700);
+      --border-color: rgba(108, 92, 231, 0.3);
+      --border-glow: rgba(108, 92, 231, 0.15);
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 40px rgba(108, 92, 231, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(108, 92, 231, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(255, 107, 157, 0.04) 0%, transparent 50%);
+    }
+
+    /* ---------- ANIMATED BACKGROUND PARTICLES ---------- */
+    .bg-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-particles span {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent-1);
+      border-radius: 50%;
+      opacity: 0.15;
+      animation: float-particle linear infinite;
+    }
+
+    .bg-particles span:nth-child(1) {
+      left: 10%;
+      top: 20%;
+      animation-duration: 18s;
+      animation-delay: 0s;
+      width: 5px;
+      height: 5px;
+    }
+
+    .bg-particles span:nth-child(2) {
+      left: 25%;
+      top: 60%;
+      animation-duration: 22s;
+      animation-delay: 2s;
+      background: var(--accent-2);
+    }
+
+    .bg-particles span:nth-child(3) {
+      left: 40%;
+      top: 30%;
+      animation-duration: 16s;
+      animation-delay: 4s;
+      width: 6px;
+      height: 6px;
+    }
+
+    .bg-particles span:nth-child(4) {
+      left: 55%;
+      top: 75%;
+      animation-duration: 20s;
+      animation-delay: 1s;
+      background: var(--accent-3);
+    }
+
+    .bg-particles span:nth-child(5) {
+      left: 70%;
+      top: 15%;
+      animation-duration: 14s;
+      animation-delay: 3s;
+    }
+
+    .bg-particles span:nth-child(6) {
+      left: 85%;
+      top: 55%;
+      animation-duration: 19s;
+      animation-delay: 5s;
+      background: var(--accent-4);
+      width: 5px;
+      height: 5px;
+    }
+
+    .bg-particles span:nth-child(7) {
+      left: 50%;
+      top: 45%;
+      animation-duration: 17s;
+      animation-delay: 6s;
+      background: var(--accent-5);
+    }
+
+    .bg-particles span:nth-child(8) {
+      left: 15%;
+      top: 85%;
+      animation-duration: 21s;
+      animation-delay: 0.5s;
+      width: 3px;
+      height: 3px;
+    }
+
+    .bg-particles span:nth-child(9) {
+      left: 92%;
+      top: 35%;
+      animation-duration: 15s;
+      animation-delay: 3.5s;
+      background: var(--accent-2);
+    }
+
+    .bg-particles span:nth-child(10) {
+      left: 35%;
+      top: 10%;
+      animation-duration: 23s;
+      animation-delay: 1.5s;
+      width: 7px;
+      height: 7px;
+    }
+
+    @keyframes float-particle {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.2;
+      }
+
+      90% {
+        opacity: 0.1;
+      }
+
+      100% {
+        transform: translateY(-100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* ---------- HEADER ---------- */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 2rem;
+      background: rgba(18, 18, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      max-width: 400px;
+      height: 2px;
+      background: var(--accent-gradient);
+      border-radius: 2px;
+    }
+
+    header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    header .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    /* ---------- CONTAINER ---------- */
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* ---------- CARDS ---------- */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-gradient);
+      opacity: 0.8;
+    }
+
+    .card:hover {
+      border-color: rgba(108, 92, 231, 0.5);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5), 0 0 60px rgba(108, 92, 231, 0.1);
+    }
+
+    .card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--text-primary);
+    }
+
+    .card h2 .icon {
+      font-size: 1.5rem;
+    }
+
+    /* ---------- PROFILE CARD (Avatar + Form) ---------- */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(108, 92, 231, 0.15);
+    }
+
+    .avatar-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 0 30px rgba(108, 92, 231, 0.3);
+    }
+
+    .profile-header-text h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .profile-header-text p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-grid .full {
+      grid-column: span 2;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      background: var(--bg-input);
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-group select option {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.75rem 1.8rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: none;
+      letter-spacing: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .btn:hover::after {
+      opacity: 1;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 6px 25px rgba(108, 92, 231, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00d4aa, #00b894);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+    }
+
+    .btn-success:hover:not(:disabled) {
+      box-shadow: 0 6px 25px rgba(0, 212, 170, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff4757, #e74c3c);
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn-warn {
+      background: linear-gradient(135deg, #ff8c42, #e67e22);
+      color: white;
+    }
+
+    .btn-warn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn-pink {
+      background: linear-gradient(135deg, #ff6b9d, #e84393);
+      color: white;
+    }
+
+    .btn-pink:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      border-color: var(--accent-1);
+      background: rgba(108, 92, 231, 0.1);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.85rem;
+    }
+
+    /* ---------- INTERVIEW SECTION ---------- */
+    .interview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .progress-badge {
+      background: rgba(0, 212, 170, 0.15);
+      border: 1px solid rgba(0, 212, 170, 0.3);
+      border-radius: 30px;
+      padding: 0.4rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--accent-2);
+    }
+
+    .question-box {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(0, 212, 170, 0.05));
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .question-box .q-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-1);
+      margin-bottom: 0.6rem;
+    }
+
+    .question-box .q-text {
+      font-size: 1.15rem;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    /* ---------- VOICE CONTROLS ---------- */
+    .voice-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 500;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+
+    .voice-status.idle {
+      background: rgba(108, 92, 231, 0.05);
+      color: var(--text-secondary);
+    }
+
+    .voice-status.listening {
+      background: rgba(255, 71, 87, 0.1);
+      border-color: rgba(255, 71, 87, 0.4);
+      color: var(--accent-3);
+      animation: voice-pulse 1.2s infinite;
+    }
+
+    .voice-status.transcribed {
+      background: rgba(0, 212, 170, 0.1);
+      border-color: rgba(0, 212, 170, 0.3);
+      color: var(--accent-2);
+    }
+
+    @keyframes voice-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
+      }
+    }
+
+    .voice-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .idle .voice-dot {
+      background: var(--text-muted);
+    }
+
+    .listening .voice-dot {
+      background: var(--accent-3);
+      box-shadow: 0 0 10px var(--accent-3);
+    }
+
+    .transcribed .voice-dot {
+      background: var(--accent-2);
+      box-shadow: 0 0 10px var(--accent-2);
+    }
+
+    .voice-buttons {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    textarea.answer-box {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      background: var(--bg-input);
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      resize: vertical;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    textarea.answer-box:focus {
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    textarea.answer-box::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* ---------- FEEDBACK ---------- */
+    .feedback-card {
+      background: linear-gradient(135deg, rgba(0, 212, 170, 0.08), rgba(0, 212, 170, 0.02));
+      border: 1px solid rgba(0, 212, 170, 0.25);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin-top: 1rem;
+      animation: fadeSlideUp 0.4s ease;
+    }
+
+    .feedback-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      margin-bottom: 0.5rem;
+    }
+
+    .feedback-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* ---------- LOADING / SPINNER ---------- */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ---------- TOAST ---------- */
+    .toast {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: linear-gradient(135deg, #ff4757, #e74c3c);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      z-index: 1000;
+      max-width: 380px;
+      box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3);
+      animation: toastSlideIn 0.4s ease;
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ---------- ANIMATIONS ---------- */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease;
+    }
+
+    .slide-up {
+      animation: fadeSlideUp 0.5s ease;
+    }
+
+    /* ================================================================
+       SCORECARD STYLES
+       ================================================================ */
+    .scorecard-title-wrap {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .scorecard-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .scorecard-title-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 0.3rem;
+      -webkit-text-fill-color: initial;
+    }
+
+    /* --- Profile Card / Candidate Info within Scorecard --- */
+    .scorecard-profile {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(0, 212, 170, 0.05));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scorecard-profile .sp-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .scorecard-profile .sp-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .scorecard-profile .sp-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .scorecard-profile .sp-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem 1rem;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .scorecard-profile .sp-details span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* --- Summary Stats Grid --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.06), rgba(0, 0, 0, 0.1));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: rgba(108, 92, 231, 0.4);
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 212, 170, 0.05));
+    }
+
+    .stat-card .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .stat-card.highlight {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 212, 170, 0.08));
+      border-color: rgba(108, 92, 231, 0.4);
+    }
+
+    .stat-card .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* --- Grade Badge --- */
+    .grade-badge-wrap {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .grade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      padding: 0.5rem 2rem;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      letter-spacing: -1px;
+      transition: var(--transition);
+    }
+
+    .grade-badge:hover {
+      transform: scale(1.05);
+    }
+
+    .grade-aplus {
+      background: linear-gradient(135deg, #00d4aa, #00b894);
+      color: white;
+    }
+
+    .grade-a {
+      background: linear-gradient(135deg, #00d4aa, #00a884);
+      color: white;
+    }
+
+    .grade-bplus {
+      background: linear-gradient(135deg, #ffd700, #f0b400);
+      color: #1a1a2e;
+    }
+
+    .grade-b {
+      background: linear-gradient(135deg, #ff8c42, #e67e22);
+      color: white;
+    }
+
+    .grade-c {
+      background: linear-gradient(135deg, #ff6b9d, #e84393);
+      color: white;
+    }
+
+    .grade-f {
+      background: linear-gradient(135deg, #ff4757, #e74c3c);
+      color: white;
+    }
+
+    .grade-badge .grade-emoji {
+      font-size: 1.5rem;
+    }
+
+    .grade-badge .grade-percent {
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0.8;
+      margin-left: 0.3rem;
+    }
+
+    /* --- Progress Bar for Percentage --- */
+    .progress-bar-wrap {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 30px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 30px;
+      background: var(--accent-gradient);
+      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* --- Per-Question Breakdown --- */
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sq-card {
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin-bottom: 0.8rem;
+      transition: var(--transition);
+    }
+
+    .sq-card:hover {
+      border-color: rgba(108, 92, 231, 0.4);
+    }
+
+    .sq-card .sq-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .sq-card .sq-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-1);
+    }
+
+    .sq-card .sq-score {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .sq-card .sq-score.high {
+      color: var(--accent-2);
+    }
+
+    .sq-card .sq-score.mid {
+      color: var(--accent-5);
+    }
+
+    .sq-card .sq-score.low {
+      color: var(--accent-3);
+    }
+
+    .sq-card .sq-question {
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 0.4rem;
+    }
+
+    .sq-card .sq-answer {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+      border-left: 2px solid var(--accent-1);
+    }
+
+    .sq-card .sq-answer strong {
+      color: var(--text-primary);
+    }
+
+    .sq-card .sq-feedback {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .sq-card .sq-feedback strong {
+      color: var(--accent-2);
+    }
+
+    .overall-remarks {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(0, 212, 170, 0.04));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .overall-remarks h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-2);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .overall-remarks p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 0.9rem;
+    }
+
+    /* --- Scorecard Loading Overlay --- */
+    .scorecard-loading {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .scorecard-loading .big-spinner {
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(108, 92, 231, 0.15);
+      border-top-color: var(--accent-1);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    .scorecard-loading p {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+
+    .scorecard-loading .loading-dots::after {
+      content: '';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0% {
+        content: '';
+      }
+
+      25% {
+        content: '.';
+      }
+
+      50% {
+        content: '..';
+      }
+
+      75% {
+        content: '...';
+      }
+    }
+
+    /* --- Error card --- */
+    .error-card {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .error-card .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .error-card h2 {
+      color: var(--accent-3);
+      margin-bottom: 0.5rem;
+    }
+
+    .error-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      header {
+        padding: 1rem;
+      }
+
+      .container {
+        margin: 1rem auto;
+      }
+
+      .card {
+        padding: 1.2rem;
+        border-radius: var(--radius-md);
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid .full {
+        grid-column: span 1;
+      }
+
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stats-grid .stat-card:last-child {
+        grid-column: span 2;
+      }
+
+      .scorecard-profile {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .interview-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .progress-badge {
+        text-align: center;
+      }
+
+      .grade-badge {
+        font-size: 1.8rem;
+        padding: 0.4rem 1.2rem;
+      }
+
+      .voice-buttons {
+        flex-direction: column;
+      }
+    }
+
+    /* ---------- CAMERA MODAL ---------- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 26, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      position: relative;
+      overflow: hidden;
+      animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-gradient);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-icon {
+      font-size: 2rem;
+    }
+
+    .modal-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-text {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    @keyframes modalScaleUp {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ---------- CAMERA FLOATING PREVIEW ---------- */
+    .camera-preview-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 240px;
+      height: 180px;
+      background: #000;
+      border: 2px solid var(--accent-1);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(108, 92, 231, 0.2);
+      overflow: hidden;
+      z-index: 1500;
+      cursor: grab;
+      user-select: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .camera-preview-container:active {
+      cursor: grabbing;
+    }
+
+    .camera-preview-container:hover {
+      border-color: var(--accent-2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 212, 170, 0.35);
+    }
+
+    .camera-preview-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      /* mirror effect */
+      pointer-events: none;
+    }
+
+    .camera-preview-header {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(10, 10, 26, 0.6);
+      backdrop-filter: blur(4px);
+      padding: 4px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-3);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-3);
+      animation: pulse-animation 1.5s infinite;
+    }
+
+    .preview-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    @keyframes pulse-animation {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.7);
+      }
+
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(255, 107, 157, 0);
+      }
+
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 107, 157, 0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background Particles -->
+  <div class="bg-particles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <header>
+    <h1>🤖 AI Interview Simulator</h1>
+    <p class="subtitle">Fill your profile, get AI-generated questions, answer with your voice!</p>
+  </header>
+
+  <div class="container">
+
+    <!-- ==================== PROFILE CARD ==================== -->
+    <div id="profileCard" class="card slide-up">
+      <div class="profile-header">
+        <div class="avatar-circle">👤</div>
+        <div class="profile-header-text">
+          <h3>Candidate Profile</h3>
+          <p>Enter your details to begin the AI-powered interview</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input id="name" type="text" placeholder="John Doe" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" placeholder="john@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="qualification">Qualification</label>
+          <select id="qualification">
+            <option value="">-- Select --</option>
+            <option value="High School">High School</option>
+            <option value="Diploma">Diploma</option>
+            <option value="Bachelor's">Bachelor's</option>
+            <option value="Master's">Master's</option>
+            <option value="PhD">PhD</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="marks">Marks / Percentage</label>
+          <input id="marks" type="number" placeholder="85" min="0" max="100" step="0.1" />
+        </div>
+        <div class="form-group full">
+          <label for="area">Area of Interest</label>
+          <input id="area" type="text" placeholder="e.g. Machine Learning, Web Development, Data Science" />
+        </div>
+        <div class="form-group full">
+          <label for="questions">Number of Questions</label>
+          <select id="questions">
+            <option value="5">5 Questions (Quick)</option>
+            <option value="10" selected>10 Questions (Standard)</option>
+            <option value="15">15 Questions (Deep Dive)</option>
+            <option value="20">20 Questions (Comprehensive)</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="startBtn" class="btn btn-primary btn-block" style="margin-top:1.2rem;">
+        🚀 Start Interview
+      </button>
+    </div>
+    <!-- ==================== INTERVIEW CARD ==================== -->
+    <div id="interviewCard" class="card" style="display:none;">
+      <div class="interview-header">
+        <h2><span class="icon">🎙️</span> Interview</h2>
+        <div style="display: flex; gap: 8px;">
+          <span id="progressBadge" class="progress-badge">Q 1 / 10</span>
+          <span id="proctoringBadge" class="progress-badge"
+            style="background: rgba(255, 71, 87, 0.15); border-color: rgba(255, 71, 87, 0.3); color: var(--accent-3);">Warnings:
+            0 / 3</span>
+        </div>
+      </div>
+      <div class="question-box">
+        <div class="q-label">📌 Current Question</div>
+        <div id="questionText" class="q-text">Loading your question...</div>
+      </div>
+
+      <button id="speakQuestionBtn" class="btn btn-outline btn-sm" style="margin-bottom:1rem;">
+        🔊 Hear Question
+      </button>
+
+      <!-- Voice status -->
+      <div id="voiceStatus" class="voice-status idle">
+        <span class="voice-dot"></span>
+        <span id="voiceStatusText">Ready to record</span>
+      </div>
+
+      <!-- Answer box -->
+      <label for="answerBox"
+        style="font-size:0.85rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.4rem;display:block;">
+        Your Answer (type or use voice):
+      </label>
+      <textarea id="answerBox" class="answer-box"
+        placeholder="🎤 Click 'Record Answer' to speak, or type your answer here..."></textarea>
+
+      <div class="voice-buttons" style="margin-top:0.5rem;">
+        <button id="recordBtn" class="btn btn-pink">🎤 Record Answer</button>
+        <button id="stopRecordBtn" class="btn btn-danger" disabled>⏹ Stop</button>
+        <button id="submitAnswerBtn" class="btn btn-success">✅ Submit Answer</button>
+      </div>
+
+      <div id="feedbackArea"></div>
+
+      <button id="nextBtn" class="btn btn-primary btn-block" style="margin-top:1.2rem; display:none;">
+        ➡️ Next Question
+      </button>
+    </div>
+
+    <!-- ==================== SCORECARD CARD ==================== -->
+    <div id="scorecardCard" class="card" style="display:none;">
+      <div id="scorecardContent"></div>
+      <button id="restartBtn" class="btn btn-primary btn-block" style="margin-top:1.2rem;">
+        🔄 Start New Interview
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Camera Permission Modal -->
+  <div id="cameraModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">📷</span>
+        <h3>Camera Access Required</h3>
+      </div>
+      <p class="modal-text">
+        To ensure a realistic and secure interview experience, this simulator requires access to your camera. A live
+        video preview will be displayed in the corner of your screen during the session.
+      </p>
+      <div class="modal-actions">
+        <button id="cancelCamBtn" class="btn btn-outline">Cancel</button>
+        <button id="allowCamBtn" class="btn btn-primary">Enable Camera</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proctoring Warning Modal -->
+  <div id="proctoringModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content"
+      style="border-color: var(--accent-3); box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3), 0 0 20px rgba(255, 71, 87, 0.15);">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3 id="proctoringModalTitle" style="color: var(--accent-3);">Proctoring Warning</h3>
+      </div>
+      <p id="proctoringModalText" class="modal-text">
+        Warning: Please keep your face centered and visible. Looking away or leaving the camera view is not allowed
+        during the Interview.
+      </p>
+      <div
+        style="margin-bottom: 1.5rem; font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--accent-3);"
+        id="proctoringWarningCount">
+        Warning 1 of 3
+      </div>
+      <div class="modal-actions">
+        <button id="resumeInterviewBtn" class="btn btn-danger btn-block">I Understand & Resume</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera Floating Preview -->
+  <!-- Camera Floating Preview -->
+  <div id="cameraPreview" class="camera-preview-container" style="display: none;">
+    <div class="camera-preview-header">
+      <span class="pulse-dot"></span>
+      <span class="preview-label">LIVE PREVIEW</span>
+    </div>
+    <video id="cameraPreviewVideo" autoplay muted playsinline></video>
+  </div>
+
+  <!-- ==================== TOAST CONTAINER ==================== -->
+  <div id="toastContainer"></div>
+
+  <script>
+    // ================================================================
+    // STATE
+    // ================================================================
+    const state = {
+      profile: null,
+      questions: [],
+      currentIndex: 0,
+      allAnswers: [],    // { question, answer } for each answered question
+      recognition: null,
+      isRecording: false,
+      hasAnswer: false,
+      cameraStream: null,
+      // Proctoring state
+      warningCount: 0,
+      proctoringLogs: [],
+      isWarningPopupOpen: false,
+      consecutiveViolations: 0,
+      isSubmitted: false
+    };
+
+    // Fresh session start: clear any stale browser session state, warning counters,
+    // or temporary restrictions from a previous interview so that a new interview
+    // always begins completely fresh with no previous state or lockouts.
+    localStorage.removeItem("interview_blocked");
+    sessionStorage.clear();
+
+    // ================================================================
+    // DOM REFS
+    // ================================================================
+    const $ = (id) => document.getElementById(id);
+
+    const profileCard = $("profileCard");
+    const interviewCard = $("interviewCard");
+    const scorecardCard = $("scorecardCard");
+    const scorecardContent = $("scorecardContent");
+    const questionText = $("questionText");
+
+    const answerBox = $("answerBox");
+    const feedbackArea = $("feedbackArea");
+    const progressBadge = $("progressBadge");
+    const voiceStatus = $("voiceStatus");
+    const voiceStatusText = $("voiceStatusText");
+    const recordBtn = $("recordBtn");
+    const stopRecordBtn = $("stopRecordBtn");
+    const submitAnswerBtn = $("submitAnswerBtn");
+    const nextBtn = $("nextBtn");
+    const speakQuestionBtn = $("speakQuestionBtn");
+    const startBtn = $("startBtn");
+    const restartBtn = $("restartBtn");
+    const toastContainer = $("toastContainer");
+    const cameraModal = $("cameraModal");
+    const allowCamBtn = $("allowCamBtn");
+    const cancelCamBtn = $("cancelCamBtn");
+    const cameraPreview = $("cameraPreview");
+    const cameraPreviewVideo = $("cameraPreviewVideo");
+
+    // ================================================================
+    // TOAST NOTIFICATIONS
+    // ================================================================
+    function showToast(msg, duration = 4000) {
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.textContent = msg;
+      toastContainer.appendChild(el);
+      setTimeout(() => { el.remove(); }, duration);
+    }
+
+    // ================================================================
+    // VOICE: SPEECH RECOGNITION
+    // ================================================================
+    function initRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Speech recognition not supported in this browser. Use Chrome or Edge.");
+        return null;
+      }
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+
+      let finalTranscript = "";
+
+      rec.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const r = event.results[i];
+          if (r.isFinal) {
+            finalTranscript += r[0].transcript + " ";
+          } else {
+            interim += r[0].transcript;
+          }
+        }
+        answerBox.value = (finalTranscript + interim).trim();
+        if (finalTranscript.trim()) {
+          state.hasAnswer = true;
+        }
+      };
+
+      rec.onerror = (event) => {
+        console.error("Recognition error:", event.error);
+        if (event.error === "no-speech" || event.error === "aborted") {
+          // ignore
+        } else {
+          showToast("Mic error: " + event.error);
+        }
+        setVoiceState("idle");
+      };
+
+      rec.onend = () => {
+        setVoiceState("transcribed");
+        state.isRecording = false;
+        updateRecordButtons();
+        finalTranscript = "";
+      };
+
+      return rec;
+    }
+
+    function setVoiceState(status) {
+      voiceStatus.className = "voice-status " + status;
+      if (status === "idle") voiceStatusText.textContent = "Ready to record";
+      else if (status === "listening") voiceStatusText.textContent = "Listening... Speak now!";
+      else if (status === "transcribed") voiceStatusText.textContent = "Answer captured successfully";
+    }
+
+    function updateRecordButtons() {
+      recordBtn.disabled = state.isRecording;
+      stopRecordBtn.disabled = !state.isRecording;
+    }
+
+    recordBtn.addEventListener("click", () => {
+      if (!state.recognition) {
+        state.recognition = initRecognition();
+        if (!state.recognition) return;
+      }
+      try {
+        answerBox.value = "";
+        state.recognition.start();
+        state.isRecording = true;
+        setVoiceState("listening");
+        updateRecordButtons();
+      } catch (e) {
+        showToast("Could not start recording: " + e.message);
+      }
+    });
+
+    stopRecordBtn.addEventListener("click", () => {
+      if (state.recognition) {
+        state.recognition.stop();
+        state.isRecording = false;
+        updateRecordButtons();
+        setVoiceState("transcribed");
+        if (answerBox.value.trim()) state.hasAnswer = true;
+      }
+    });
+
+    // ================================================================
+    // VOICE: TEXT-TO-SPEECH (Speak Question)
+    // ================================================================
+    speakQuestionBtn.addEventListener("click", () => {
+      if (!state.questions[state.currentIndex]) return;
+      const utterance = new SpeechSynthesisUtterance(state.questions[state.currentIndex]);
+      utterance.rate = 0.92;
+      utterance.pitch = 1.05;
+      utterance.lang = "en-US";
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      speakQuestionBtn.textContent = "🔊 Speaking...";
+      utterance.onend = () => { speakQuestionBtn.textContent = "🔊 Hear Question"; };
+      utterance.onerror = () => { speakQuestionBtn.textContent = "🔊 Hear Question"; };
+    });
+
+    // ================================================================
+    // PROCTORING SYSTEM LOGIC
+    // ================================================================
+    let proctoringInterval = null;
+
+    async function loadProctoringModels() {
+      showToast("Initializing AI Proctoring models...", 2500);
+      const modelUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+      await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(modelUrl);
+      console.log("Proctoring models loaded successfully.");
+    }
+
+    function startProctoring() {
+      state.warningCount = 0;
+      state.consecutiveViolations = 0;
+      state.isWarningPopupOpen = false;
+      state.proctoringLogs = [];
+      state.isSubmitted = false;
+
+      const proctoringBadge = $("proctoringBadge");
+      if (proctoringBadge) proctoringBadge.textContent = "Warnings: 0 / 3";
+
+      if (proctoringInterval) clearInterval(proctoringInterval);
+
+      proctoringInterval = setInterval(async () => {
+        if (state.isWarningPopupOpen || state.isSubmitted || !state.cameraStream) return;
+
+        const videoEl = cameraPreviewVideo;
+        if (!videoEl || videoEl.paused || videoEl.ended) return;
+
+        try {
+          const detection = await faceapi.detectSingleFace(
+            videoEl,
+            new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+          ).withFaceLandmarks();
+
+          if (!detection) {
+            state.consecutiveViolations++;
+            console.log(`[Proctoring] Face not detected. Consecutive count: ${state.consecutiveViolations}`);
+            if (state.consecutiveViolations >= 5) {
+              triggerProctoringWarning("Face not detected in camera frame");
+            }
+          } else {
+            const landmarks = detection.landmarks;
+            const positions = landmarks.positions;
+            if (positions && positions.length >= 46) {
+              const nose = positions[30];
+              const leftEye = positions[36];
+              const rightEye = positions[45];
+
+              const eyeDist = rightEye._x - leftEye._x;
+              if (eyeDist > 0) {
+                const leftRatio = (nose._x - leftEye._x) / eyeDist;
+                const rightRatio = (rightEye._x - nose._x) / eyeDist;
+
+                if (leftRatio < 0.25 || rightRatio < 0.25) {
+                  state.consecutiveViolations++;
+                  console.log(`[Proctoring] Looking away. Consecutive count: ${state.consecutiveViolations}`);
+                  if (state.consecutiveViolations >= 5) {
+                    const direction = leftRatio < 0.25 ? "Looking left" : "Looking right";
+                    triggerProctoringWarning(`Looking away from the screen (${direction})`);
+                  }
+                } else {
+                  state.consecutiveViolations = 0;
+                }
+              } else {
+                state.consecutiveViolations++;
+                if (state.consecutiveViolations >= 5) {
+                  triggerProctoringWarning("Face not detected properly");
+                }
+              }
+            } else {
+              state.consecutiveViolations++;
+              if (state.consecutiveViolations >= 5) {
+                triggerProctoringWarning("Face not detected properly");
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Face detection error:", e);
+        }
+      }, 300);
+    }
+
+    function triggerProctoringWarning(violationType) {
+      state.consecutiveViolations = 0;
+      state.isWarningPopupOpen = true;
+      state.warningCount++;
+
+      const timestamp = new Date().toLocaleTimeString();
+      state.proctoringLogs.push({ timestamp, type: violationType });
+
+      // Update badge in UI
+      const proctoringBadge = $("proctoringBadge");
+      if (proctoringBadge) {
+        proctoringBadge.textContent = `Warnings: ${state.warningCount} / 3`;
+      }
+
+      // Log to backend in background (fire-and-forget)
+      fetch("/api/log-violation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: state.profile.name,
+          email: state.profile.email,
+          type: violationType,
+          timestamp: new Date().toLocaleString(),
+          warningCount: state.warningCount
+        })
+      }).catch(err => console.error("Failed to log violation to server:", err));
+
+      // Check if warnings reached 3
+      if (state.warningCount >= 3) {
+        handleProctoringDisqualification();
+      } else {
+        // Show warning modal
+        const proctoringModal = $("proctoringModal");
+        const proctoringWarningCount = $("proctoringWarningCount");
+        if (proctoringModal && proctoringWarningCount) {
+          proctoringWarningCount.textContent = `Warning ${state.warningCount} of 3`;
+          proctoringModal.style.display = "flex";
+        }
+      }
+    }
+
+    async function handleProctoringDisqualification() {
+      // Capture any in-progress answer from the answer box so that ALL responses
+      // (including the current one being typed/spoken) are saved before auto-submit.
+      const currentAnswer = answerBox.value.trim();
+      const currentQuestion = state.questions[state.currentIndex];
+      const alreadySaved = state.allAnswers.some(
+        (a) => a.question === currentQuestion
+      );
+      if (currentAnswer && currentQuestion && !alreadySaved) {
+        state.allAnswers.push({
+          question: currentQuestion,
+          answer: currentAnswer,
+        });
+      }
+
+      state.isSubmitted = true;
+      if (proctoringInterval) clearInterval(proctoringInterval);
+
+      // Close warning modal if open
+      $("proctoringModal").style.display = "none";
+
+      // Stop camera stream
+      if (state.cameraStream) {
+        state.cameraStream.getTracks().forEach(track => track.stop());
+        state.cameraStream = null;
+      }
+      cameraPreview.style.display = "none";
+
+      // Stop recognition
+      if (state.recognition) {
+        try { state.recognition.abort(); } catch (e) { }
+      }
+      window.speechSynthesis.cancel();
+
+      // Exit fullscreen if active
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => console.log(err));
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+
+      // Show terminated evaluation screen
+      interviewCard.style.display = "none";
+      scorecardCard.style.display = "";
+      scorecardCard.classList.add("slide-up");
+      scorecardContent.innerHTML = `
+        <div class="scorecard-loading">
+          <div class="big-spinner"></div>
+          <p style="color: var(--accent-3); font-weight: 700; font-size: 1.2rem;">🚫 Interview Terminated</p>
+          <p>You have received 3 proctoring warnings. Automatically submitting answers captured so far...</p>
+          <span class="loading-dots"></span>
+        </div>
+      `;
+
+      await generateScorecard(true);
+    }
+
+    $("resumeInterviewBtn").addEventListener("click", () => {
+      $("proctoringModal").style.display = "none";
+      state.isWarningPopupOpen = false;
+    });
+
+    // CAMERA PERMISSION MODAL HANDLERS
+    // ================================================================
+    cancelCamBtn.addEventListener("click", () => {
+      cameraModal.style.display = "none";
+    });
+
+    allowCamBtn.addEventListener("click", async () => {
+      cameraModal.style.display = "none";
+
+      const name = $("name").value.trim();
+      const email = $("email").value.trim();
+      const qualification = $("qualification").value;
+      const marks = $("marks").value.trim();
+      const areaOfInterest = $("area").value.trim();
+      const numberOfQuestions = $("questions").value;
+
+      state.profile = { name, email, qualification, marks, areaOfInterest, numberOfQuestions };
+      state.allAnswers = [];
+
+      startBtn.disabled = true;
+      startBtn.innerHTML = '<span class="spinner"></span> Initializing Camera...';
+
+      try {
+        // Request camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        state.cameraStream = stream;
+        cameraPreviewVideo.srcObject = stream;
+        cameraPreview.style.display = "block";
+
+        // Reset preview positions (so it starts at bottom-right)
+        cameraPreview.style.left = "auto";
+        cameraPreview.style.top = "auto";
+        cameraPreview.style.bottom = "2rem";
+        cameraPreview.style.right = "2rem";
+
+        // Request fullscreen
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(err => console.log("Fullscreen request failed:", err));
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        } else if (docEl.msRequestFullscreen) {
+          docEl.msRequestFullscreen();
+        }
+
+        startBtn.innerHTML = '<span class="spinner"></span> Loading Proctoring AI...';
+        await loadProctoringModels();
+
+        startBtn.innerHTML = '<span class="spinner"></span> Generating questions...';
+        const res = await fetch("/api/generate-questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name, qualification, marks,
+            areaOfInterest,
+            numberOfQuestions: parseInt(numberOfQuestions, 10),
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to generate questions.");
+
+        state.questions = data.questions;
+        state.currentIndex = 0;
+
+        // Switch UI with animation
+        profileCard.style.display = "none";
+        interviewCard.style.display = "";
+        interviewCard.classList.add("slide-up");
+        scorecardCard.style.display = "none";
+
+        showQuestion();
+        startProctoring();
+      } catch (err) {
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          showToast("Camera permission is required to start the interview. Please enable it in browser settings.");
+        } else {
+          showToast(err.message);
+        }
+        // Exit fullscreen if active
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+        // Stop camera stream if it succeeded before fetch failed
+        if (state.cameraStream) {
+          state.cameraStream.getTracks().forEach(track => track.stop());
+          state.cameraStream = null;
+        }
+        cameraPreview.style.display = "none";
+        startBtn.disabled = false;
+        startBtn.innerHTML = "🚀 Start Interview";
+      }
+    });
+
+    // ================================================================
+    // START INTERVIEW
+    // ================================================================
+    startBtn.addEventListener("click", () => {
+      const name = $("name").value.trim();
+      const email = $("email").value.trim();
+      const qualification = $("qualification").value;
+      const marks = $("marks").value.trim();
+      const areaOfInterest = $("area").value.trim();
+
+      if (!name || !email || !qualification || !marks || !areaOfInterest) {
+        showToast("Please fill all fields!");
+        return;
+      }
+
+      // Show the permission modal instead of starting immediately
+      cameraModal.style.display = "flex";
+    });
+
+    // ================================================================
+    // DRAG LOGIC FOR FLOATING CAMERA PREVIEW
+    // ================================================================
+    let isDragging = false;
+    let startX, startY;
+    let initialX, initialY;
+
+    cameraPreview.addEventListener("mousedown", dragStart);
+    cameraPreview.addEventListener("touchstart", dragStart, { passive: false });
+
+    function dragStart(e) {
+      isDragging = true;
+
+      const clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+
+      startX = clientX;
+      startY = clientY;
+
+      const rect = cameraPreview.getBoundingClientRect();
+      initialX = rect.left;
+      initialY = rect.top;
+
+      // Switch positioning to top/left relative to viewport
+      cameraPreview.style.bottom = "auto";
+      cameraPreview.style.right = "auto";
+      cameraPreview.style.left = `${initialX}px`;
+      cameraPreview.style.top = `${initialY}px`;
+
+      if (e.type.startsWith("touch")) {
+        document.addEventListener("touchmove", dragMove, { passive: false });
+        document.addEventListener("touchend", dragEnd);
+      } else {
+        document.addEventListener("mousemove", dragMove);
+        document.addEventListener("mouseup", dragEnd);
+      }
+
+      e.preventDefault();
+    }
+
+    function dragMove(e) {
+      if (!isDragging) return;
+
+      const clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+
+      let newX = initialX + dx;
+      let newY = initialY + dy;
+
+      const rect = cameraPreview.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+
+      newX = Math.max(0, Math.min(newX, maxX));
+      newY = Math.max(0, Math.min(newY, maxY));
+
+      cameraPreview.style.left = `${newX}px`;
+      cameraPreview.style.top = `${newY}px`;
+
+      if (e.type.startsWith("touch")) {
+        e.preventDefault();
+      }
+    }
+
+    function dragEnd() {
+      isDragging = false;
+      document.removeEventListener("mousemove", dragMove);
+      document.removeEventListener("mouseup", dragEnd);
+      document.removeEventListener("touchmove", dragMove);
+      document.removeEventListener("touchend", dragEnd);
+    }
+
+    // ================================================================
+    // SHOW CURRENT QUESTION
+    // ================================================================
+    function showQuestion() {
+      const q = state.questions[state.currentIndex];
+      questionText.textContent = q || "No question available.";
+      answerBox.value = "";
+      feedbackArea.innerHTML = "";
+      nextBtn.style.display = "none";
+      submitAnswerBtn.disabled = false;
+      state.hasAnswer = false;
+      setVoiceState("idle");
+      state.isRecording = false;
+      updateRecordButtons();
+
+      const total = state.questions.length;
+      const current = state.currentIndex + 1;
+      progressBadge.textContent = `Q ${current} / ${total}`;
+    }
+
+    // ================================================================
+    // SUBMIT ANSWER
+    // ================================================================
+    submitAnswerBtn.addEventListener("click", async () => {
+      const answer = answerBox.value.trim();
+      if (!answer) {
+        showToast("Please provide an answer (type or use voice)!");
+        return;
+      }
+
+      // Store the answer
+      state.allAnswers.push({
+        question: state.questions[state.currentIndex],
+        answer: answer,
+      });
+
+      const isLast = state.currentIndex >= state.questions.length - 1;
+
+      if (isLast) {
+        // Last question — go straight to scorecard evaluation
+        submitAnswerBtn.disabled = true;
+        submitAnswerBtn.innerHTML = '<span class="spinner"></span> Generating scorecard...';
+
+        // Stop proctoring monitoring
+        if (proctoringInterval) clearInterval(proctoringInterval);
+        proctoringInterval = null;
+        state.isSubmitted = true;
+
+        // Stop camera tracks and hide preview
+        if (state.cameraStream) {
+          state.cameraStream.getTracks().forEach(track => track.stop());
+          state.cameraStream = null;
+        }
+        cameraPreview.style.display = "none";
+
+        // Exit fullscreen if active
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+
+        interviewCard.style.display = "none";
+        scorecardCard.style.display = "";
+        scorecardCard.classList.add("slide-up");
+        scorecardContent.innerHTML = `
+          <div class="scorecard-loading">
+            <div class="big-spinner"></div>
+            <p>🧠 AI is evaluating all your answers<span class="loading-dots"></span></p>
+            <p style="margin-top:0.5rem; font-size:0.85rem; opacity:0.6;">This may take a moment</p>
+          </div>
+        `;
+        await generateScorecard();
+      } else {
+        // Not last — show feedback and next button
+        submitAnswerBtn.disabled = true;
+        submitAnswerBtn.innerHTML = '<span class="spinner"></span> Evaluating...';
+
+        try {
+          const res = await fetch("/api/evaluate-answer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              question: state.questions[state.currentIndex],
+              answer,
+              profile: state.profile,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Evaluation failed.");
+
+          feedbackArea.innerHTML = `
+            <div class="feedback-card slide-up">
+              <h3>💬 AI Feedback</h3>
+              <p>${data.feedback}</p>
+            </div>
+          `;
+
+          nextBtn.style.display = "";
+          submitAnswerBtn.disabled = true;
+        } catch (err) {
+          showToast(err.message);
+          submitAnswerBtn.disabled = false;
+        } finally {
+          submitAnswerBtn.innerHTML = "✅ Submit Answer";
+        }
+      }
+    });
+
+    // ================================================================
+    // NEXT QUESTION
+    // ================================================================
+    nextBtn.addEventListener("click", () => {
+      state.currentIndex++;
+      showQuestion();
+    });
+
+    // ================================================================
+    // GENERATE COMPREHENSIVE SCORECARD
+    // ================================================================
+    async function generateScorecard(isDisqualified = false) {
+      if (isDisqualified && state.allAnswers.length === 0) {
+        state.allAnswers.push({
+          question: state.questions[0] || "Interview Question",
+          answer: "[Interview terminated automatically due to 3 proctoring violations]"
+        });
+      }
+      try {
+        const res = await fetch("/api/evaluate-all", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profile: state.profile,
+            answers: state.allAnswers,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Scorecard generation failed.");
+
+        if (isDisqualified) {
+          data.scorecard.overall_remarks = "INTERVIEW TERMINATED DUE TO PROCTORING VIOLATIONS: " + data.scorecard.overall_remarks;
+        }
+
+        renderScorecard(data.scorecard);
+      } catch (err) {
+        showToast(err.message);
+        scorecardContent.innerHTML = `
+          <div class="error-card">
+            <div class="error-icon">😵</div>
+            <h2>Scorecard Generation Failed</h2>
+            <p>${err.message}</p>
+            <button onclick="location.reload()" class="btn btn-primary">
+              🔄 Try Again
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // ================================================================
+    // RENDER SCORECARD
+    // ================================================================
+    function renderScorecard(s) {
+      const gradeClass = getGradeClass(s.grade);
+
+      // Build proctoring HTML
+      let proctoringHTML = "";
+      if (state.proctoringLogs && state.proctoringLogs.length > 0) {
+        let logsItemsHTML = "";
+        state.proctoringLogs.forEach((log) => {
+          logsItemsHTML += `
+            <div style="display: flex; justify-content: space-between; padding: 0.6rem 1rem; background: rgba(255, 71, 87, 0.05); border-left: 3px solid var(--accent-3); border-radius: 4px; margin-bottom: 0.5rem; font-size: 0.9rem; border-top: 1px solid rgba(255, 71, 87, 0.1); border-right: 1px solid rgba(255, 71, 87, 0.1); border-bottom: 1px solid rgba(255, 71, 87, 0.1);">
+              <span>⚠️ ${log.type}</span>
+              <span style="color: var(--text-muted);">${log.timestamp}</span>
+            </div>
+          `;
+        });
+
+        proctoringHTML = `
+          <div class="overall-remarks slide-up" style="border-color: var(--accent-3); background: rgba(255, 71, 87, 0.02); margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--accent-3); display: flex; align-items: center; gap: 0.5rem;"><span class="icon">🛡️</span> Proctoring Review Logs (${state.warningCount}/3 Warnings)</h3>
+            <div style="margin-top: 0.8rem; max-height: 200px; overflow-y: auto;">
+              ${logsItemsHTML}
+            </div>
+            ${state.warningCount >= 3 ? `<p style="color: var(--accent-3); font-weight: 700; margin-top: 0.8rem; font-size: 0.95rem;">🚫 Candidate has been disqualified due to multiple proctoring violations. Answers captured were automatically submitted and the session was ended.</p>` : ''}
+          </div>
+        `;
+      }
+
+      // Build per-question cards
+      let questionsHTML = "";
+      s.per_question.forEach((q, i) => {
+        const score = q.score || 0;
+        const scoreClass = score >= 7 ? "high" : score >= 4 ? "mid" : "low";
+        questionsHTML += `
+          <div class="sq-card slide-up" style="animation-delay:${i * 0.05}s">
+            <div class="sq-header">
+              <span class="sq-num">Question ${i + 1} of ${s.per_question.length}</span>
+              <span class="sq-score ${scoreClass}">${score}/10</span>
+            </div>
+            <div class="sq-question">${q.question}</div>
+            <div class="sq-answer"><strong>Answer:</strong> ${q.answer || "No answer"}</div>
+            <div class="sq-feedback"><strong>Feedback:</strong> ${q.feedback}</div>
+          </div>
+        `;
+      });
+
+      const html = `
+        <div class="scorecard-title-wrap">
+          <span class="scorecard-title-icon">🏆</span>
+          <div class="scorecard-title">Score Card</div>
+        </div>
+
+        <div class="scorecard-profile slide-up">
+          <div class="sp-avatar">${s.candidate_name ? s.candidate_name.charAt(0).toUpperCase() : '?'}</div>
+          <div class="sp-info">
+            <div class="sp-name">${s.candidate_name}</div>
+            <div class="sp-details">
+              <span>📧 ${s.email}</span>
+              <span>🎓 ${s.qualification}</span>
+              <span>📚 ${s.topic}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card highlight">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">Average Score</div>
+            <div class="stat-value">${s.total_score}</div>
+            <div class="stat-sub">out of 10</div>
+          </div>
+          <div class="stat-card highlight">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-label">Percentage</div>
+            <div class="stat-value">${s.percentage}%</div>
+            <div class="stat-sub">overall performance</div>
+          </div>
+          <div class="stat-card highlight">
+            <div class="stat-icon">📝</div>
+            <div class="stat-label">Questions</div>
+            <div class="stat-value">${s.per_question.length}</div>
+            <div class="stat-sub">total answered</div>
+          </div>
+        </div>
+
+        <div class="grade-badge-wrap slide-up">
+          <div class="grade-badge ${gradeClass}">
+            <span class="grade-emoji">${getGradeEmoji(s.grade)}</span>
+            ${s.grade}
+            <span class="grade-percent">(${s.percentage}%)</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width: 0%;" data-width="${Math.min(s.percentage, 100)}"></div>
+        </div>
+
+        <div class="section-title">📋 Question-wise Breakdown</div>
+        ${questionsHTML}
+
+        ${proctoringHTML}
+
+        <div class="overall-remarks slide-up">
+          <h3>📊 Overall Remarks</h3>
+          <p>${s.overall_remarks}</p>
+        </div>
+      `;
+
+      scorecardContent.innerHTML = html;
+
+      // Animate progress bar after render
+      requestAnimationFrame(() => {
+        const bar = document.querySelector('.progress-bar-fill');
+        if (bar) {
+          const targetWidth = bar.getAttribute('data-width');
+          setTimeout(() => {
+            bar.style.width = targetWidth + '%';
+          }, 200);
+        }
+      });
+    }
+
+    function getGradeClass(grade) {
+      const map = { "A+": "grade-aplus", "A": "grade-a", "B+": "grade-bplus", "B": "grade-b", "C": "grade-c", "F": "grade-f" };
+      return map[grade] || "";
+    }
+
+    function getGradeEmoji(grade) {
+      const map = { "A+": "🌟", "A": "⭐", "B+": "👍", "B": "👌", "C": "📈", "F": "💪" };
+      return map[grade] || "🎯";
+    }
+
+    // ================================================================
+    // RESTART
+    // ================================================================
+    restartBtn.addEventListener("click", () => {
+      state.profile = null;
+      state.questions = [];
+      state.currentIndex = 0;
+      state.allAnswers = [];
+      state.isRecording = false;
+      // Reset proctoring state
+      if (proctoringInterval) clearInterval(proctoringInterval);
+      proctoringInterval = null;
+      state.warningCount = 0;
+      state.consecutiveViolations = 0;
+      state.isWarningPopupOpen = false;
+      state.isSubmitted = false;
+      state.proctoringLogs = [];
+
+      if (state.recognition) {
+        try { state.recognition.abort(); } catch (e) { }
+      }
+      // Reset recognition instance so the next interview creates a brand-new one.
+      state.recognition = null;
+
+      // Clear any browser session state and temporary data so a new interview in
+      // the same browser starts as a completely fresh session with no previous
+      // state, warning counters, or restrictions.
+      localStorage.removeItem("interview_blocked");
+      sessionStorage.clear();
+
+      // Stop camera tracks and hide preview
+      if (state.cameraStream) {
+        state.cameraStream.getTracks().forEach(track => track.stop());
+        state.cameraStream = null;
+      }
+      cameraPreview.style.display = "none";
+
+      // Update badges
+      const proctoringBadge = $("proctoringBadge");
+      if (proctoringBadge) proctoringBadge.textContent = "Warnings: 0 / 3";
+
+      // Exit fullscreen if active
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(err => console.log(err));
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+
+      profileCard.style.display = "";
+      profileCard.classList.add("slide-up");
+      interviewCard.style.display = "none";
+      scorecardCard.style.display = "none";
+      $("name").value = "";
+      $("email").value = "";
+      $("qualification").value = "";
+      $("marks").value = "";
+      $("area").value = "";
+      answerBox.value = "";
+      feedbackArea.innerHTML = "";
+    });
+  </script>
+</body>
+
+</html>
